@@ -7,6 +7,9 @@ def index(request):
     contexto = { "lista": lista }
     return render(request, 'termooo/index.html', contexto)
 
+def popup(request):
+    return render(request, 'termooo/popup.html')
+
 def jogo(request):
     return render(request, 'termooo/jogar.html')
 

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,14 +7,46 @@
     <script src="https://kit.fontawesome.com/026675cdf7.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
-    {% comment %} <link rel="stylesheet" href="css/reset.css"> {% endcomment %}
-    <link rel="stylesheet" href="../../static/css/reset.css">
-    {% comment %} <link rel="stylesheet" href="css/jogo.css"> {% endcomment %}
-    <link rel="stylesheet" href="../../static/css/jogo.css">
+    
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jogo.css' %}">
 
     <title>Palavra</title>
+    <style>
+        .container-layout{
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            position: absolute;
+        }
+        .container-popup{
+            display: block;
+            z-index: 10;
+            height: 500px;
+            width: 650px;
+            border-radius: 10px;
+            padding: 10px;
+            background: #fff;
+        }
+        
+    </style>
 </head>
 <body>
+    
+    <!-- POPUP -->
+    <div class="container-layout">
+        <div id="container-popup" class="container-popup">
+            <div class="informacoes-popup">
+                <span class="botao-fechar" id="fechar-popup">&times;</span>
+                <p>This is a popup!</p>
+            </div>
+        </div>
+    </div>
+   
     <!-- HEADER -->
     <nav class="header">
         <div class="navbar navbar-expand-lg header__content" aria-label="Offcanvas navbar large">
@@ -97,6 +130,7 @@
         </div>
     </nav>
     
+
     
     <!-- USUARIO JOGANDO -->
 
@@ -219,7 +253,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-    <script src="js/global.js"></script>
+    <script src="{% static 'js/global.js' %}"></script>
 
 </body>
 </html>
