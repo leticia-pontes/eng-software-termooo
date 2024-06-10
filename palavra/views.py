@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from .forms import LoginForm, CadastroForm, UserInfoForm
 import json
 
 from .utils import get_palavra_aleatoria
 from .models import Palavra, Tema, Usuario
-from .forms import LoginForm, CadastroForm, UserInfoForm
 from .termo import Termo, InvalidAttempt
 
 # Página Inicial
@@ -15,7 +16,6 @@ def index(request):
 
 # Autenticação
 def entrar(request):
-    error_message = None
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
@@ -25,12 +25,9 @@ def entrar(request):
             if user is not None:
                 login(request, user)
                 return redirect('jogo')
-        else:
-            error_message = form.error_messages['invalid_login']
     else:
         form = LoginForm(request)
-    return render(request, 'palavra/login.html', {'form': form, 'error': error_message})
-
+    return render(request, 'palavra/login.html', {'form': form})
 
 def cadastrar(request):
     if request.method == 'POST':
@@ -41,25 +38,22 @@ def cadastrar(request):
             return redirect('jogo')
     else:
         form = CadastroForm()
-
     return render(request, 'palavra/cadastro.html', {'form': form})
 
 # Lógica do jogo
-@login_required
+@login_required(login_url='/palavra/entrar/')
+@csrf_exempt
 def jogo(request):
     usuario = request.user
     temas = Tema.objects.all()
 
+    # Seleciona a palavra da jogada
     if 'palavra_correta' not in request.session or request.session.get('nova_palavra', False):
         request.session['palavra_correta'] = get_palavra_aleatoria()
         request.session['nova_palavra'] = False
 
     if request.method == 'POST':
-        try:
-            dados = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
-
+        dados = json.loads(request.body)
         palavra = dados.get('palavra', '')
         palavra_correta = request.session['palavra_correta']
 
@@ -76,7 +70,7 @@ def jogo(request):
                     usuario.save()
 
                     request.session['nova_palavra'] = True
-                    return JsonResponse({'status': 'success', 'result': result.to_dict(), 'nova_pontuacao': usuario.pontuacao_total})
+                return JsonResponse({'status': 'success', 'result': result.to_dict()})
             except InvalidAttempt as e:
                 return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
@@ -86,18 +80,16 @@ def jogo(request):
     })
 
 
-@login_required
-def get_pontuacao(request):
-    if request.user.is_authenticated:
-        pontuacao = request.user.pontuacao_total
-        return JsonResponse({'pontuacao': pontuacao})
-    else:
-        return JsonResponse({'error': 'Usuário não autenticado'}, status=401)
-
 # Configurações
 @login_required(login_url='/palavra/entrar/')
 def configuracoes(request):
-    user_info = request.user
+
+    user = request.user
+    try:
+        user_info = Usuario.objects.get(username=user)
+    except Usuario.DoesNotExist:
+        user_info = None
+
     if request.method == 'POST':
         form = UserInfoForm(request.POST, request.FILES, instance=user_info)
         if form.is_valid():
@@ -111,13 +103,6 @@ def configuracoes(request):
         'user_info': user_info
     })
 
-# @login_required
-# def excluir_conta(request):
-#     if request.method == 'POST':
-#         request.user.delete()
-#         messages.success(request, 'Sua conta foi excluída com sucesso.')
-#         return redirect('index')
-#     return render(request, 'palavra/excluir_conta.html')
 
 # Features
 @login_required(login_url='/palavra/entrar/')

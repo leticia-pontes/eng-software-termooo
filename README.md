@@ -35,11 +35,11 @@ Palavra é um jogo baseado na web, inspirado no popular jogo online Wordle (term
 
 Execute os testes para garantir que a aplicação está funcionando corretamente:
 ```
-python manage.py test palavra.tests
+python manage.py test
 ```
 Para verificar a cobertura de código:
 ```
-python -m coverage run manage.py test
+coverage run --source='.' manage.py test
 coverage report
 ```
 
